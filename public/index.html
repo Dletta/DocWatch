@@ -15,8 +15,11 @@
 				<div class="name">{{doc.name}}</div><div class="author">{{doc.author}}</div>
 		</div>
 		<form name="newDoc">
-			<input type="file" data-file="doc.file" /><input type="text" placeholder="Doc Name" ng-model="doc.name" /><button type="submit" ng-click="uploadFile()">Submit</button>
-			{{doc.file}} {{doc.name}}
+			<input type="file" file-model="file" /><input type="text" placeholder="Doc Name" ng-model="name" /><button type="submit" ng-click="uploadFile()">Submit</button>
+		</form>
+		<div>
+			<input type="text" ng-model="filename" /><button ng-click="download()">Get</button>
+		</div>
 	</div>
 </body>
 

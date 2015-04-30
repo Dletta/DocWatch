@@ -1,6 +1,8 @@
 /* Server-side Code for express server.
 	Application : Document Watch,
 	Desc: Document Control with GridFS and Express
+	Author: Jachen Duschletta
+	Version: alpha 0.0 04/25/2015
 */
 
 /* Dependencies */
@@ -24,7 +26,21 @@ var gfs = Grid(conn.db);
 
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
-app.use(multer({dest: './uploads',inMemory:"true" }));
+app.use(multer({
+	dest: './uploads',
+	rename: function(fieldname, filename, req, res){
+		return filename
+	},
+	onFileUploadComplete: function (file, req, res) {
+		var writestream = gfs.createWriteStream({metadata:{ documentname: req.body.name}});
+		fs.createReadStream(file.path).pipe(writestream);
+		console.log(file.originalname + ' uploaded to DB from ' + file.path);
+		gfs.files.find().toArray(function(err, files){
+			res.send(files);
+		});
+	}
+
+}));
 app.use(morgan('dev'));
 
 /* http routes */
@@ -39,13 +55,17 @@ app.get('/api/docList', function (req, res) {
 	});
 });
 
-app.post('/api/docList', function (req, res) {
-	console.log(req.params);
+app.get('api/doclist/:filename', function (req, res){
+	var filename = req.params.filename;
+	console.log("Trying to get " + filename);
+	var readstream = gfs.createReadStream({
+		"metadata": { "documentname": filename}
+	});
+	readstream.pipe(response);
 });
 
-app.all('/uploads', function(req, res) {
-	fs.writeFile('uploads/'+ req.files.filename, req.files.file );
-	console.log(req.body);
+app.post('/uploads', function(req, res) {
+	console.log('Upload received, with name: ' + req.body.name)
 });
 
 

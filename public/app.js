@@ -1,24 +1,43 @@
 var docW = angular.module('docW', []);
 
-docW.directive('file', function(){
+docW.directive('fileModel', function($parse){
 	return {
-		scope: {
-			file: '='
-		},
-		link: function(scope, el, attrs){
-			el.bind('change', function(event){
-				var files = event.target.files;
-				var file = files[0];
-				scope.file = file ? file.name : undefined;
-				scope.$apply();
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			var model = $parse(attrs.fileModel);
+			var modelSetter = model.assign;
+			
+			element.bind('change', function() {
+				scope.$apply(function() {
+					modelSetter(scope, element[0].files[0]);
+				});
 			});
 		}
 	};
 });
 
-docW.controller('mainController', ['$scope', '$http', function($scope, $http){
+docW.service('fileUpload', ['$http', function($http) {
+	this.uploadFileToUrl = function(file, name, uploadUrl) {
+		var fd = new FormData();
+		fd.append('file', file);
+		fd.append('name', name);
+		$http.post(uploadUrl, fd, {
+			transformRequest: angular.identity,
+			headers: {'Content-Type': undefined}
+		})
+		.success(function(data) {
+			console.log('submitted ' + data);
+		})
+		.error(function(data) {
+			console.log('Error: ' + data);
+		});
+	}
+}]);
+
+docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($scope, $http, fileUpload){
 	$scope.test = "it works!";
 	$scope.doc = {};
+	
 	$http.get('/api/docList')
 		.success(function(data){
 			$scope.doc = data;
@@ -28,18 +47,23 @@ docW.controller('mainController', ['$scope', '$http', function($scope, $http){
 			console.log('Error: ' + data);
 		});
 		
-	$scope.uploadFile = function() {
-		$http({
-			method: 'POST',
-			url: '/uploads',
-			headers:{
-				'Content-Type':'undefined'
-			},
-			data:{
-				file: $scope.doc.file,
-				text: $scope.doc.name
-			}
-		});
-	};
+		$scope.uploadFile = function() {
+			var file = $scope.file;
+			console.log('File is ' + JSON.stringify(file));
+			var uploadUrl = "/uploads";
+			var name = $scope.name;
+			fileUpload.uploadFileToUrl(file, name, uploadUrl);
+		};
+		
+		$scope.download = function() {
+			var filename = $scope.filename;
+			$http.get('api/doclist/' + filename)
+			.success(function(data){
+				console.log('go!');
+			})
+			.error(function(data){
+				console.log('Error: ' + data);
+			});
+		}
 	
 }]);
