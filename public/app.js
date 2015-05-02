@@ -26,7 +26,7 @@ docW.service('fileUpload', ['$http', function($http) {
 			headers: {'Content-Type': undefined}
 		})
 		.success(function(data) {
-			console.log('submitted ' + data);
+			console.log('Upload success!')
 		})
 		.error(function(data) {
 			console.log('Error: ' + data);
@@ -34,7 +34,21 @@ docW.service('fileUpload', ['$http', function($http) {
 	}
 }]);
 
-docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($scope, $http, fileUpload){
+docW.service('getFile', ['$http', function($http) {
+	this.getIt = function(filename, uploadUrl) {
+		var fd = new FormData();
+		fd.append('filename', filename);
+		$http.post(uploadUrl, fd, {
+			transformRequest: angular.identity,
+			headers: {'Content-Type': undefined}
+		})
+		.error(function(data) {
+			console.log('Error: ' + data);
+		});
+	}
+}]);
+
+docW.controller('mainController', ['$scope', '$http', 'fileUpload', 'getFile', function($scope, $http, fileUpload, getFile){
 	$scope.test = "it works!";
 	$scope.doc = {};
 	
@@ -49,21 +63,18 @@ docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($sc
 		
 		$scope.uploadFile = function() {
 			var file = $scope.file;
-			console.log('File is ' + JSON.stringify(file));
 			var uploadUrl = "/uploads";
 			var name = $scope.name;
 			fileUpload.uploadFileToUrl(file, name, uploadUrl);
+			$scope.file = "";
+			$scope.name = "";
 		};
 		
 		$scope.download = function() {
 			var filename = $scope.filename;
-			$http.get('api/doclist/' + filename)
-			.success(function(data){
-				console.log('go!');
-			})
-			.error(function(data){
-				console.log('Error: ' + data);
-			});
-		}
+			console.log("Trying to get file: " + filename);
+			var uploadUrl = "/api/file";
+			getFile.getIt(filename, uploadUrl);
+		};
 	
 }]);

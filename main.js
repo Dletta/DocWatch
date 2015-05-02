@@ -32,7 +32,7 @@ app.use(multer({
 		return filename
 	},
 	onFileUploadComplete: function (file, req, res) {
-		var writestream = gfs.createWriteStream({metadata:{ documentname: req.body.name}});
+		var writestream = gfs.createWriteStream({filename: file.originalname, metadata:{ documentname: req.body.name}});
 		fs.createReadStream(file.path).pipe(writestream);
 		console.log(file.originalname + ' uploaded to DB from ' + file.path);
 		gfs.files.find().toArray(function(err, files){
@@ -55,13 +55,9 @@ app.get('/api/docList', function (req, res) {
 	});
 });
 
-app.get('api/doclist/:filename', function (req, res){
-	var filename = req.params.filename;
-	console.log("Trying to get " + filename);
-	var readstream = gfs.createReadStream({
-		"metadata": { "documentname": filename}
-	});
-	readstream.pipe(response);
+app.post('/api/file', function (req, res){
+	var filename = req.body.filename;
+	res.end("<html>"+filename+"</html>");
 });
 
 app.post('/uploads', function(req, res) {

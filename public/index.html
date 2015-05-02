@@ -12,7 +12,7 @@
 			<p>Testing Scope Angular {{ test }}</p>
 			List of Documents in GridFS MongoDB
 			<div class="list" ng-repeat="doc in docs">
-				<div class="name">{{doc.name}}</div><div class="author">{{doc.author}}</div>
+				<div class="name">{{doc.filename}}</div><div class="author">{{doc.metadata.documentname}}</div>
 		</div>
 		<form name="newDoc">
 			<input type="file" file-model="file" /><input type="text" placeholder="Doc Name" ng-model="name" /><button type="submit" ng-click="uploadFile()">Submit</button>
