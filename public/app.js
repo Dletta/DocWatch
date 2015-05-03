@@ -49,32 +49,25 @@ docW.service('getFile', ['$http', function($http) {
 }]);
 
 docW.controller('mainController', ['$scope', '$http', 'fileUpload', 'getFile', function($scope, $http, fileUpload, getFile){
-	$scope.test = "it works!";
-	$scope.doc = {};
+	$scope.test = "running!";
+	$scope.docs = {};
 	
 	$http.get('/api/docList')
 		.success(function(data){
-			$scope.doc = data;
+			$scope.docs = data;
 			console.log(data);
+			console.log("Received response with " + data);
 		})
 		.error(function(data){
 			console.log('Error: ' + data);
 		});
 		
 		$scope.uploadFile = function() {
-			var file = $scope.file;
-			var uploadUrl = "/uploads";
-			var name = $scope.name;
-			fileUpload.uploadFileToUrl(file, name, uploadUrl);
-			$scope.file = "";
-			$scope.name = "";
+
 		};
 		
 		$scope.download = function() {
-			var filename = $scope.filename;
-			console.log("Trying to get file: " + filename);
-			var uploadUrl = "/api/file";
-			getFile.getIt(filename, uploadUrl);
+
 		};
 	
 }]);

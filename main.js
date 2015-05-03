@@ -6,40 +6,25 @@
 */
 
 /* Dependencies */
+var util = require('util');
 var express = require('express');
 var app = express();
 var morgan = require('morgan');
-var mongoose = require('mongoose');
 var multer = require('multer');
 var fs = require('fs');
-var Grid = require('gridfs-stream');
+var mongo = require('mongodb');
 
-/* Connect to Database and define Schema */
+/* Database Setup */
+var db = new mongo.Db('docW', new mongo.Server('localhost', 27017));
+var GridStore = mongo.GridStore;
 
-var Schema = mongoose.Schema;
-mongoose.connect('mongodb://localhost:27017/docW');
-var conn = mongoose.connection;
-Grid.mongo = mongoose.mongo;
-var gfs = Grid(conn.db);
 
 /* App Middleware */
 
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 app.use(multer({
-	dest: './uploads',
-	rename: function(fieldname, filename, req, res){
-		return filename
-	},
-	onFileUploadComplete: function (file, req, res) {
-		var writestream = gfs.createWriteStream({filename: file.originalname, metadata:{ documentname: req.body.name}});
-		fs.createReadStream(file.path).pipe(writestream);
-		console.log(file.originalname + ' uploaded to DB from ' + file.path);
-		gfs.files.find().toArray(function(err, files){
-			res.send(files);
-		});
-	}
-
+	dest: './uploads'
 }));
 app.use(morgan('dev'));
 
@@ -50,18 +35,24 @@ app.get('/', function (req, res) {
 });
 
 app.get('/api/docList', function (req, res) {
-	gfs.files.find().toArray(function(err, files){
-		res.send(files);
+	db.open(function(err, db) {
+		console.log("Database Error: " + err);
+		var coll = db.collection('fs.files'); 
+		coll.find().toArray(function(err, docs) {
+			console.log("Query Error: " + err);
+			res.send(docs);
+			db.close();
+		});
+		
 	});
 });
 
 app.post('/api/file', function (req, res){
-	var filename = req.body.filename;
-	res.end("<html>"+filename+"</html>");
+
 });
 
 app.post('/uploads', function(req, res) {
-	console.log('Upload received, with name: ' + req.body.name)
+	console.log('Upload received, with name: ' + req.body.name);
 });
 
 

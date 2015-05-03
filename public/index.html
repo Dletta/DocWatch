@@ -9,16 +9,32 @@
 <body ng-controller="mainController">
 	<div class="container">
 		<div class="test">
-			<p>Testing Scope Angular {{ test }}</p>
+			<p>Angular {{ test }}</p>
 			List of Documents in GridFS MongoDB
-			<div class="list" ng-repeat="doc in docs">
-				<div class="name">{{doc.filename}}</div><div class="author">{{doc.metadata.documentname}}</div>
-		</div>
-		<form name="newDoc">
-			<input type="file" file-model="file" /><input type="text" placeholder="Doc Name" ng-model="name" /><button type="submit" ng-click="uploadFile()">Submit</button>
-		</form>
-		<div>
-			<input type="text" ng-model="filename" /><button ng-click="download()">Get</button>
+			<table style="border:solid 1px black">
+				<tr style="border:solid 1px black">
+					<th style="border:solid 1px black">
+						Filename
+					</th>
+					<th style="border:solid 1px black">
+						Upload Date
+					</th>
+					<th style="border:solid 1px black">
+						Length
+					</th>
+				</tr>
+				<tr ng-repeat="doc in docs" style="border:solid 1px black">
+					<td style="border-bottom:solid 1px black">
+						{{ doc.filename}}
+					</td>
+					<td style="border-bottom:solid 1px black">
+						{{ doc.uploadDate }}
+					</td>
+					<td style="border-bottom:solid 1px black">
+						{{ doc.length}}
+					</td>
+				</tr>
+			</table>
 		</div>
 	</div>
 </body>
