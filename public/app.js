@@ -1,4 +1,5 @@
 var docW = angular.module('docW', []);
+var data = {};
 
 docW.directive('fileModel', function($parse){
 	return {
@@ -17,16 +18,18 @@ docW.directive('fileModel', function($parse){
 });
 
 docW.service('fileUpload', ['$http', function($http) {
-	this.uploadFileToUrl = function(file, name, uploadUrl) {
+	this.uploadFileToUrl = function(file, name, type, uploadUrl) {
 		var fd = new FormData();
 		fd.append('file', file);
 		fd.append('name', name);
+		fd.append('type', type);
 		$http.post(uploadUrl, fd, {
 			transformRequest: angular.identity,
 			headers: {'Content-Type': undefined}
 		})
 		.success(function(data) {
 			console.log('Upload success!')
+			return data;
 		})
 		.error(function(data) {
 			console.log('Error: ' + data);
@@ -34,21 +37,7 @@ docW.service('fileUpload', ['$http', function($http) {
 	}
 }]);
 
-docW.service('getFile', ['$http', function($http) {
-	this.getIt = function(filename, uploadUrl) {
-		var fd = new FormData();
-		fd.append('filename', filename);
-		$http.post(uploadUrl, fd, {
-			transformRequest: angular.identity,
-			headers: {'Content-Type': undefined}
-		})
-		.error(function(data) {
-			console.log('Error: ' + data);
-		});
-	}
-}]);
-
-docW.controller('mainController', ['$scope', '$http', 'fileUpload', 'getFile', function($scope, $http, fileUpload, getFile){
+docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($scope, $http, fileUpload){
 	$scope.test = "running!";
 	$scope.docs = {};
 	
@@ -62,12 +51,22 @@ docW.controller('mainController', ['$scope', '$http', 'fileUpload', 'getFile', f
 			console.log('Error: ' + data);
 		});
 		
-		$scope.uploadFile = function() {
-
-		};
-		
-		$scope.download = function() {
-
-		};
+	$scope.send = function() {
+		var file = $scope.file;
+		var name = $scope.name;
+		var type = $scope.type;
+		var url = "/uploadFile";
+		$scope.docs = fileUpload.uploadFileToUrl(file, name, type, url);
+	};
 	
+	$scope.select = function(filename) {
+		console.log("Requesting: " + filename);
+		$http.post("/api/file", {msg:filename}).
+		success(function(data){
+			console.log("Response Data" + util.inspect(data));
+		}).
+		error(function(err){
+			console.log("Response Error: " + err);
+		});
+	}
 }]);

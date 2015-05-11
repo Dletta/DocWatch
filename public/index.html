@@ -17,26 +17,33 @@
 						Filename
 					</th>
 					<th style="border:solid 1px black">
-						Upload Date
+						Author
 					</th>
 					<th style="border:solid 1px black">
-						Length
+						Type
 					</th>
 				</tr>
-				<tr ng-repeat="doc in docs" style="border:solid 1px black">
+				<tr ng-repeat="doc in docs" style="border:solid 1px black" ng-click="select(doc.filename)">
 					<td style="border-bottom:solid 1px black">
 						{{ doc.filename}}
 					</td>
 					<td style="border-bottom:solid 1px black">
-						{{ doc.uploadDate }}
+						{{ doc.metadata.Author }}
 					</td>
 					<td style="border-bottom:solid 1px black">
-						{{ doc.length}}
+						{{ doc.metadata.Type }}
 					</td>
 				</tr>
 			</table>
 		</div>
 	</div>
+	<form name="Data Input">
+		<input type="file" file-model="file" />
+		<input type="text" placeholder="Name" ng-model="name" />
+		<input type="text" placeholder="Doc Type" ng-model="type" />
+		<button ng-click="send()">Send</button>
+	</form>
+	<p>Name: {{name}}, Type: {{type}};</p>
 </body>
 
 </html>
