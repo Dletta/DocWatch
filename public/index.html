@@ -28,10 +28,10 @@
 						{{ doc.filename}}
 					</td>
 					<td style="border-bottom:solid 1px black">
-						{{ doc.metadata.Author }}
+						{{ doc.metadata.author }}
 					</td>
 					<td style="border-bottom:solid 1px black">
-						{{ doc.metadata.Type }}
+						{{ doc.metadata.type }}
 					</td>
 				</tr>
 			</table>
@@ -43,7 +43,7 @@
 		<input type="text" placeholder="Doc Type" ng-model="type" />
 		<button ng-click="send()">Send</button>
 	</form>
-	<p>Name: {{name}}, Type: {{type}};</p>
+	<p>Author: {{name}}, Type: {{type}};</p>
 </body>
 
 </html>
