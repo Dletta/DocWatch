@@ -51,12 +51,12 @@ app.get('/api/docList', function (req, res) {
 	});
 });
 
-app.post('/api/file', function (req, res){
-	console.log("Requested File: " + util.inspect(req.msg));
+app.get('/api/file/:filename', function (req, res){
+	console.log("Requested File: " + util.inspect(req.params.filename));
 	db.open(function(err, db) {
 		console.log("Database Error: " + err);
 		var coll = db.collection('fs.files');
-		var filename = req.body.filename;
+		var filename = req.params.filename;
 		coll.findOne({'filename':filename}, {}, function(err, doc){
 			GridStore.read(db, doc._id, function(err, buffer){
 				console.log("Data read Error: " + err + " for doc " + util.inspect(doc.filename));
@@ -78,7 +78,12 @@ app.post('/uploadFile', function(req, res) {
 	var fileN = req.files.file.originalname;
 	db.open(function(err, db) {
 		console.log("Database Error: " + err);
-		var gFile = new GridStore(db, fileN, "w");
+		var gFile = new GridStore(db, fileN, "w", {
+			"metadata":{
+				"author": req.body.name,
+				"type": req.body.type
+			}
+		});
 		gFile.open(function(err, gFile){
 			console.log("Grid File Error: " + err);
 			gFile.writeFile(__dirname + "/uploads/" + fileN, function(err, gFile){
@@ -90,35 +95,13 @@ app.post('/uploadFile', function(req, res) {
 								console.log("Server File Remove Error: " + err);
 								if(!err){console.log("Deleted from Server Uploads Folder - " + fileN);}
 							});
-							emitter.emit('fileDB', fileN, req.body.name, req.body.type, res, db);
+						db.close()
 					});
 			});
 		});
 	});
 });
 
-emitter.on('fileDB', function(fileN, name, type, res, db){
-	console.log('File Event with ' + fileN + ', ' + name + ', ' + type + '.' );
-	db.open(function(err, db){
-		console.log("Database Error: " + err);
-		var coll = db.collection('fs.files');
-		console.log(util.inspect(coll.findAndModify({
-			'query': {'filename': fileN},
-			'update': {$set:{
-				'metadata': {
-					'author': name,
-					'type': type
-				}
-			}},
-			'new' : true
-		})));
-		coll.find().toArray(function(err, docs){
-			console.log("Find Error: " + err);
-			res.send(docs);
-			db.close();
-		});
-	});
-});
 
 /* Application init */
 

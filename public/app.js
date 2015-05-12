@@ -61,12 +61,6 @@ docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($sc
 	
 	$scope.select = function(filename) {
 		console.log("Requesting: " + filename);
-		$http.post("/api/file", {msg:filename}).
-		success(function(data){
-			console.log("Response Data" + util.inspect(data));
-		}).
-		error(function(err){
-			console.log("Response Error: " + err);
-		});
+		window.open('/api/file/'+filename);
 	}
 }]);
