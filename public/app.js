@@ -37,19 +37,11 @@ docW.service('fileUpload', ['$http', function($http) {
 	}
 }]);
 
-docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($scope, $http, fileUpload){
+docW.controller('mainController', ['$scope', '$http', 'fileUpload', 'socket', function($scope, $http, fileUpload, socket){
 	$scope.test = "running!";
 	$scope.docs = {};
 	
-	$http.get('/api/docList')
-		.success(function(data){
-			$scope.docs = data;
-			console.log(data);
-			console.log("Received response with " + data);
-		})
-		.error(function(data){
-			console.log('Error: ' + data);
-		});
+	socket.emit('update');
 		
 	$scope.send = function() {
 		var file = $scope.file;
@@ -59,8 +51,36 @@ docW.controller('mainController', ['$scope', '$http', 'fileUpload', function($sc
 		$scope.docs = fileUpload.uploadFileToUrl(file, name, type, url);
 	};
 	
-	$scope.select = function(filename) {
-		console.log("Requesting: " + filename);
-		window.open('/api/file/'+filename);
-	}
+	socket.on('updateList', function(docs){
+		console.log('Received Updated List');
+		$scope.docs = docs;
+	});
+	
 }]);
+
+
+
+/*Getting Socket Ready to be sued in the Scope Object*/
+docW.factory('socket', function($rootScope){
+	var socket = io.connect();
+	return {
+		on: function(eventName, callback) {
+			socket.on(eventName, function() {
+				var args = arguments;
+				$rootScope.$apply(function() {
+					callback.apply(socket, args);
+				});
+			});
+		},
+		emit: function(eventName, data, callback) {
+			socket.emit(eventName, data, function() {
+				var args = arguments;
+				$rootScope.$apply(function() {
+					if(callback) {
+						callback.apply(socket, args);
+					}
+				});
+			});
+		}
+	};
+});

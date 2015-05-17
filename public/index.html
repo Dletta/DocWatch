@@ -1,8 +1,8 @@
 <!DOCTYPE html >
 <html ng-app="docW">
 <head>
+	<script src="/socket.io/socket.io.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-	<script src="app.js"></script>
 	<title>Document Watch</title>
 </head>
 
@@ -22,8 +22,11 @@
 					<th style="border:solid 1px black">
 						Type
 					</th>
+					<th style="border:solid 1px grey">
+						DownloadFile
+					</th>
 				</tr>
-				<tr ng-repeat="doc in docs" style="border:solid 1px black" ng-click="select(doc.filename)">
+				<tr ng-repeat="doc in docs" style="border:solid 1px black">
 					<td style="border-bottom:solid 1px black">
 						{{ doc.filename}}
 					</td>
@@ -32,6 +35,9 @@
 					</td>
 					<td style="border-bottom:solid 1px black">
 						{{ doc.metadata.type }}
+					</td>
+					<td style="border-bottom:solid 1px black">
+						<a ng-href="/api/file/{{doc.filename}}">{{doc.filename}}</a>
 					</td>
 				</tr>
 			</table>
@@ -44,6 +50,8 @@
 		<button ng-click="send()">Send</button>
 	</form>
 	<p>Author: {{name}}, Type: {{type}};</p>
+	
+	<script src="app.js"></script>
 </body>
 
 </html>
